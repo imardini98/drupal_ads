@@ -1,0 +1,84 @@
+diff --git a/geofield.module b/geofield.module
+index ffb599d..88f929f 100644
+--- a/geofield.module
++++ b/geofield.module
+@@ -231,32 +231,40 @@ function geofield_validate_geom($item) {
+*  If empty, return TRUE
+*/
+function geofield_geom_is_empty($item) {
+-  if (!empty($item['input_format'])) {
+-    switch ($item['input_format']) {
+-      case 'wkt':
+-        if (empty($item['geom'])) {
+-          return TRUE;
+-        }
+-        break;
+-      case 'lat/lon':
++  
++  // First check to see if it's a non-geom powered input array
++  if (is_array($item)) { 
++    if (!empty($item['input_format'])) {
++      if ($item['input_format'] == 'lat/lon') {
+    if (empty($item['geom']['lat']) || empty($item['geom']['lon'])) {
+    return TRUE;
+    }
+-        break;
+-      case 'bounds':
++      }
++      if ($item['input_format'] == 'bounds') {
+    if (empty($item['geom']['top']) || empty($item['geom']['right']) || empty($item['geom']['bottom']) || empty($item['geom']['left'])) {
+    return TRUE;
+    }
+-        break;
+-      case 'json':
+-        if (empty($item['geom'])) {
+-          return TRUE;
+-        }
+-        break;
++      }
+}
+}
++  
++  // Check the geom
++  if (empty($item)) {
++    return TRUE;
++  }
++  
++  geophp_load();
++  if (is_array($item)) {
++    $geom = geoPHP::load($item['geom']);
++  }
++  else {
++    $geom = geoPHP::load($item);
++  }
++  if ($geom) {
++    return $geom->isEmpty();
++  }
+else {
+-    return empty($item['geom']);
++    return TRUE;
+}
+}
+
+@@ -336,20 +344,10 @@ function geofield_field_load($entity_type, $entities, $field, $instances, $langc
+}
+
+/**
+- * Implements hook_content_is_empty().
++ * Implements hook_field_is_empty().
+*/
+function geofield_field_is_empty($item, $field) {
+-  if (isset($item['input_format'])) {
+-    switch ($item['input_format']) {
+-      case GEOFIELD_INPUT_LAT_LON:
+-        return ((trim($item['geom']['lat']) == '') || (trim($item['geom']['lon']) == ''));
+-      case GEOFIELD_INPUT_BOUNDS:
+-        return ((trim($item['geom']['top']) == '') || (trim($item['geom']['right']) == '') ||
+-        (trim($item['geom']['bottom']) == '') || (trim($item['geom']['left']) == ''));
+-    }
+-  }
+-  //@@TODO: Check if it's an empty geometry as per geoPHP $geometry->empty()
+-  return empty($item['geom']);
++  return geofield_geom_is_empty($item);
+}
+/**

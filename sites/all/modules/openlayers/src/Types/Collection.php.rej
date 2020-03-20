@@ -1,0 +1,11 @@
+--- src/Types/Collection.php
++++ src/Types/Collection.php
+@@ -9,7 +9,7 @@ namespace Drupal\openlayers\Types;
+ use Drupal\Component\Plugin\PluginBase;
+ use Drupal\openlayers\Component\Annotation\OpenlayersPlugin;
+ use Drupal\openlayers\Openlayers;
+-use Drupal\openlayers\Types\Object;
++use Drupal\openlayers\Types\Base;
+ 
+ 
+ /**

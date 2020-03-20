@@ -257,7 +257,7 @@ function geofield_geom_is_empty($item) {
     }
   }
   else {
-    return empty($item['geom']);
+    return is_string($item) ? empty($item) : empty($item['geom']);
   }
 }
 
